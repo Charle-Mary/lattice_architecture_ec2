@@ -1,7 +1,11 @@
-output "instance_ids" {
-  value = aws_instance.example[*].id
+output "destination_instance_id" {
+  value = aws_instance.destination_instance.id
 }
 
-output "instance_public_ips" {
-  value = aws_instance.example[*].public_ip
+output "source_instance_security_group" {
+  value = aws_security_group.allow_public_traffic.id
+}
+
+output "spurce_ec2_login" {
+  value = "ssh -i ${var.key_name}.pem ec2-user@${aws_instance.source_instance.public_ip}"
 }

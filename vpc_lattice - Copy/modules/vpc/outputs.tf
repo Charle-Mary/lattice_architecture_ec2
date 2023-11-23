@@ -1,10 +1,22 @@
-output "vpcs" {
+output "source_vpc_id" {
+  value = aws_vpc.source_vpc.id
+}
+output "destination_vpc_id" {
   description = "VPC Outputs"
-  value       = { for vpc in aws_vpc.this : vpc.tags.Name => { "cidr_block" : vpc.cidr_block, "id" : vpc.id } }
+  value       = aws_vpc.destination_vpc.id
 }
-output "subnet_ids_list" {
-  value = [for subnet in aws_subnet.this : subnet.id]
+output "destination_private_subnet_id" {
+  value = aws_subnet.destination_priv_subnet.id
 }
+
+output "destination_public_subnet_id" {
+  value = aws_subnet.destination_pub_subnet.id
+}
+
+output "source_public_subnet_id" {
+  value = aws_subnet.source_pub_subnet.id
+}
+
 
 
 
