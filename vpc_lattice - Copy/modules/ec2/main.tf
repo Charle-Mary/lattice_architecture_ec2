@@ -26,10 +26,12 @@
 #  }
 #}
 
+# Get personal IP to be used to ssh into the client instance
 data "http" "current_ip" {
   url = "http://ifconfig.me/ip"
 }
 
+# Get AMI ID of amazon linux 2 2023 version
 data "aws_ami" "ami_id" {
   most_recent = true
   owners      = ["amazon"]
@@ -55,6 +57,7 @@ data "aws_ami" "ami_id" {
   }
 }
 
+# Get prefix list ID of the vpc lattice service which would be given sole access to the destination EC2 instance
 data "aws_ec2_managed_prefix_list" "lattice_service_prefix_list" {
   filter {
     name   = "prefix-list-name"
@@ -62,6 +65,7 @@ data "aws_ec2_managed_prefix_list" "lattice_service_prefix_list" {
   }
 }
 
+# Security group to allow traffic from vpc lattice service
 resource "aws_security_group" "allow_lattice_service_traffic" {
   name   = "Allow traffic from lattice service"
   vpc_id = var.destination_vpc_id
@@ -86,6 +90,7 @@ resource "aws_security_group" "allow_lattice_service_traffic" {
   }
 }
 
+# Security group to allow traffic from personal IP and public traffic on port 80
 resource "aws_security_group" "allow_public_traffic" {
   name   = "Allow traffic from public"
   vpc_id = var.source_vpc_id
@@ -119,6 +124,7 @@ resource "aws_security_group" "allow_public_traffic" {
   }
 }
 
+# Client EC2 instance created in the source VPC
 resource "aws_instance" "source_instance" {
   ami                         = data.aws_ami.ami_id.image_id
   instance_type               = var.instance_type
@@ -139,6 +145,7 @@ resource "aws_instance" "source_instance" {
   }
 }
 
+# Destination EC2 instance created in destination VPC
 resource "aws_instance" "destination_instance" {
   ami                         = data.aws_ami.ami_id.image_id
   instance_type               = var.instance_type
@@ -153,6 +160,7 @@ resource "aws_instance" "destination_instance" {
 
   vpc_security_group_ids = [aws_security_group.allow_lattice_service_traffic.id]
 
+  # Script to create simple web server on the destination ec2 instance
   user_data = <<EOF
 #!/bin/bash
 sudo yum update -y

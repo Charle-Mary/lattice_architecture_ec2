@@ -61,6 +61,7 @@
 #   }
 # }
 
+# Target group for the destination service
 resource "aws_vpclattice_target_group" "ec2_group" {
   name = "instances"
   type = "INSTANCE"
@@ -93,11 +94,13 @@ resource "aws_vpclattice_target_group_attachment" "ec2_group_attachment" {
   }
 }
 
+# Destination service
 resource "aws_vpclattice_service" "destination_service" {
   name      = "apache-web"
   auth_type = "NONE"
 }
 
+# Listener for the destination service component
 resource "aws_vpclattice_listener" "destination_service_listener" {
   name               = "apache-web-listener"
   protocol           = "HTTP"
@@ -111,39 +114,19 @@ resource "aws_vpclattice_listener" "destination_service_listener" {
   }
 }
 
-#resource "aws_vpclattice_listener_rule" "destination_service_listener_rule" {
-#  listener_identifier = aws_vpclattice_listener.destination_service_listener.listener_id
-#  name                = "apache-web-listener-rule"
-#  priority            = 10
-#  service_identifier  = aws_vpclattice_service.destination_service.id
-#  match {
-#    http_match {
-#      path_match {
-#        match {
-#          prefix = "/"
-#        }
-#      }
-#    }
-#  }
-#  action {
-#    forward {
-#      target_groups {
-#        target_group_identifier = aws_vpclattice_target_group.ec2_group.id
-#      }
-#    }
-#  }
-#}
-
+# Service network for managing all lattice component VPCs and services
 resource "aws_vpclattice_service_network" "service_network" {
   name      = "servnet"
   auth_type = "NONE"
 }
 
+# Destination service association with service network
 resource "aws_vpclattice_service_network_service_association" "service_association" {
   service_identifier         = aws_vpclattice_service.destination_service.id
   service_network_identifier = aws_vpclattice_service_network.service_network.id
 }
 
+# Source VPC association with service network
 resource "aws_vpclattice_service_network_vpc_association" "vpc_association" {
   vpc_identifier             = var.source_vpc_id
   service_network_identifier = aws_vpclattice_service_network.service_network.id

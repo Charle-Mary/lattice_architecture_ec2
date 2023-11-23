@@ -47,14 +47,7 @@
 #  route_table_id = aws_route_table.this[each.value.rt_name].id
 #}
 
-
-resource "aws_vpc" "destination_vpc" {
-  cidr_block = var.destination_cidr
-  tags = {
-    Name = "destination_vpc"
-  }
-}
-
+# Source VPC where client ec2 instance is provisioned
 resource "aws_vpc" "source_vpc" {
   cidr_block = var.source_cidr
   tags = {
@@ -62,6 +55,15 @@ resource "aws_vpc" "source_vpc" {
   }
 }
 
+# Destination VPC where web server is provisioned
+resource "aws_vpc" "destination_vpc" {
+  cidr_block = var.destination_cidr
+  tags = {
+    Name = "destination_vpc"
+  }
+}
+
+# Public subnet where client instance is provisioned
 resource "aws_subnet" "source_pub_subnet" {
   vpc_id     = aws_vpc.source_vpc.id
   cidr_block = var.source_pub_subnet_cidr
@@ -70,6 +72,7 @@ resource "aws_subnet" "source_pub_subnet" {
   }
 }
 
+# Destination public subnet where nat gateway is provisioned
 resource "aws_subnet" "destination_pub_subnet" {
   vpc_id     = aws_vpc.destination_vpc.id
   cidr_block = var.destination_pub_subnet_cidr
@@ -78,6 +81,7 @@ resource "aws_subnet" "destination_pub_subnet" {
   }
 }
 
+# Subnet where web server is provisioned
 resource "aws_subnet" "destination_priv_subnet" {
   vpc_id     = aws_vpc.destination_vpc.id
   cidr_block = var.destination_priv_subnet_cidr
@@ -87,6 +91,7 @@ resource "aws_subnet" "destination_priv_subnet" {
 }
 
 
+# CLient VPC internet gateway
 resource "aws_internet_gateway" "source_igw" {
   vpc_id = aws_vpc.source_vpc.id
   tags = {
@@ -94,6 +99,7 @@ resource "aws_internet_gateway" "source_igw" {
   }
 }
 
+# Destination VPC internet gateway
 resource "aws_internet_gateway" "destination_igw" {
   vpc_id = aws_vpc.destination_vpc.id
   tags = {

@@ -60,10 +60,13 @@
 #   ]
 # }
 
+
+# Create VPC and its components
 module "vpc" {
   source = "./modules/vpc"
 }
 
+# Create client and destination instances in their respective VPCs
 module "ec2" {
   source                = "./modules/ec2"
   destination_vpc_id    = module.vpc.destination_vpc_id
@@ -72,6 +75,7 @@ module "ec2" {
   source_subnet_id      = module.vpc.source_public_subnet_id
 }
 
+# Create the service network and other components of the lattice architecture
 module "vpc_lattice" {
   source                = "./modules/vpc_lattice"
   source_vpc_id         = module.vpc.source_vpc_id
